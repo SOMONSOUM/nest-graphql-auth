@@ -1,0 +1,37 @@
+version: '3.9'
+services:
+  redis:
+    container_name: redis_nestjscontainer
+    image: redis:alpine
+    restart: always
+    ports:
+      - '6379:6379'
+    command: redis-server --loglevel warning
+    volumes:
+      - ./docker-volumes/cache:/data
+
+  mysql:
+    container_name: mysql_nestjscontainer
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      - MYSQL_USER=nestjsauth
+      - MYSQL_DATABASE=nestjsauth
+      - MYSQL_ROOT_PASSWORD=nestjsauth
+      - MYSQL_PASSWORD=nestjsauth
+    ports:
+      - '3306:3306'
+    volumes:
+      - ./docker-volumes/mysql:/var/lib/mysql
+
+  app:
+    container_name: my_app
+    build:
+      dockerfile: Dockerfile.dev
+    restart: always
+    ports:
+      - 3000:3000
+    depends_on:
+      - mysql
+      - redis
